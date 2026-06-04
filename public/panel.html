@@ -70,7 +70,7 @@ td{padding:9px 10px;border-bottom:1px solid #f0f0f0;vertical-align:top;}
         <div class="err" id="gerr"></div>
         <div class="enlace-result" id="er">
           <p>Enlace generado — válido para un solo uso</p>
-          <div class="enlace-url" id="eu"></div>
+          <input type="text" class="enlace-url" id="eu" readonly onclick="this.select()" style="cursor:pointer;width:100%;"/>
           <button class="btn-sm" onclick="copiar()">Copiar enlace</button>
         </div>
       </div>
@@ -105,12 +105,20 @@ function generar(){
   fetch("/.netlify/functions/generar-token",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pwd,nombre:n,email:e})})
   .then(function(r){return r.json();}).then(function(d){
     if(d.error){err.textContent=d.error;err.style.display="block";return;}
-    document.getElementById("eu").textContent=d.enlace;
+    document.getElementById("eu").value=d.enlace;
     document.getElementById("er").style.display="block";
     document.getElementById("cnombre").value="";document.getElementById("cemail").value="";
   });
 }
-function copiar(){navigator.clipboard.writeText(document.getElementById("eu").textContent).then(function(){alert("Copiado!");});}
+function copiar(){
+  var inp=document.getElementById("eu");
+  inp.select();
+  try{
+    navigator.clipboard.writeText(inp.value).then(function(){alert("Copiado!");}).catch(function(){
+      document.execCommand("copy");alert("Copiado!");
+    });
+  }catch(e){document.execCommand("copy");alert("Copiado!");}
+}
 function cargarResp(){
   document.getElementById("rc").innerHTML='<div class="empty">Cargando...</div>';
   fetch("/.netlify/functions/listar-respuestas",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pwd})})
